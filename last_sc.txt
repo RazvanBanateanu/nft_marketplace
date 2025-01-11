@@ -305,7 +305,7 @@ contract Marketplace is ReentrancyGuard {
         auctions[_itemId] = Auction(
             _itemId,
             _startingPrice,
-            0,
+            _startingPrice,
             payable(address(0)),
             endTime,
             false,
@@ -320,83 +320,57 @@ contract Marketplace is ReentrancyGuard {
     function bid(uint _itemId) external payable nonReentrant {
         Auction storage auction = auctions[_itemId];
         require(block.timestamp < auction.endTime, "auction ended");
-        require(msg.value > auction.startingPrice, "bid must be higher than current highest bid");
+        require(msg.value > auction.highestBid, "bid must be higher than current highest bid");
 
-        // Refund previous highest bidder securely using call
+        // Refund previous highest bidder
         if (auction.highestBid > 0) {
-            (bool success, ) = auction.highestBidder.call{value: auction.highestBid}("");
-            require(success, "Refund to previous highest bidder failed");
+            auction.highestBidder.transfer(auction.highestBid);
         }
 
-        emit BidPlaced(_itemId, msg.value, msg.sender);
-
-        // Update the auction with the new bid
         auction.highestBid = msg.value;
         auction.highestBidder = payable(msg.sender);
+
+        emit BidPlaced(_itemId, msg.value, msg.sender);
     }
 
-
-    function endAuction(uint _itemId) external payable nonReentrant {
+    function endAuction(uint _itemId) external nonReentrant {
         Auction storage auction = auctions[_itemId];
-        Item storage item = items[_itemId];
         
         require(block.timestamp >= auction.endTime, "auction not yet ended");
         require(!auction.ended, "auction already ended");
 
         auction.ended = true;
-        
-        
-        if (auction.highestBid > 0) {
-            // Check if the auction contract has enough funds to pay the seller
-            require(address(this).balance >= auction.highestBid, 
-            string(abi.encodePacked("Insufficient contract balance ", 
-            uintToString(address(this).balance), ", needed ", 
-            uintToString(auction.highestBid))));
+        Item storage item = items[_itemId];
 
+        if (auction.highestBid > 0) {
             // Pay the seller
             auction.seller.transfer(auction.highestBid);
-            
+
             // Transfer the NFT to the highest bidder
-            if (auction.highestBidder != address(0)) {
-                item.nft.transferFrom(address(this), auction.highestBidder, item.tokenId);
-                item.listedForSale = false;
-                item.listedForAuction = false;
-                item.listedForTrade = false;
-                item.owner = auction.highestBidder;
-            } else {
-                // If no bidder exists (address(0)), revert the item to the seller
-                item.nft.transferFrom(address(this), auction.seller, item.tokenId);
-            }
+            item.nft.transferFrom(address(this), auction.highestBidder, item.tokenId);
+            item.listedForSale = false;
+            item.listedForAuction = false;
+            item.listedForTrade = false;
+            item.owner = auction.highestBidder;
 
             emit AuctionEnded(_itemId, auction.highestBid, auction.highestBidder);
-        } 
-        else {
+        } else {
             // No bids, NFT remains with the seller
             item.nft.transferFrom(address(this), auction.seller, item.tokenId);
         }
-    }
+        console.log("contract address:", address(this));
+        console.log("item.owner:", item.owner);
+        console.log("item.seller:", item.seller);
+        console.log("block.timestamp:", block.timestamp);
+        console.log("auction.endTime:", auction.endTime);
+        console.log("auction.ended:", auction.ended);
+        console.log("auction.highestBid:", auction.highestBid);
+        console.log("auction.highestBidder:", auction.highestBidder);
 
+    }
 
     function getTotalPrice(uint _itemId) view public returns(uint){
         return((items[_itemId].price*(100 + feePercent))/100);
     }
-
-    function uintToString(uint256 value) internal pure returns (string memory) {
-    if (value == 0) return "0";
-    uint256 temp = value;
-    uint256 digits;
-    while (temp != 0) {
-        digits++;
-        temp /= 10;
-    }
-    bytes memory buffer = new bytes(digits);
-    while (value != 0) {
-        digits -= 1;
-        buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
-        value /= 10;
-    }
-    return string(buffer);
-}
-
 
 }

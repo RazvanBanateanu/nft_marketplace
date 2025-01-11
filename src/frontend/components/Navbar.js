@@ -2,21 +2,21 @@ import {
     Link
 } from "react-router-dom";
 import { Navbar, Nav, Button, Container } from 'react-bootstrap'
-import market from './market.png'
+import logo from './logo.jpeg'
 
 const Navigation = ({ web3Handler, account }) => {
     return (
-        <Navbar expand="lg" bg="secondary" variant="dark">
+        <Navbar expand="lg" bg="warning" variant="black">
             <Container>
                 <Navbar.Brand>
-                    <img src={market} width="40" height="40" className="" alt="" />
-                    &nbsp; NFT Marketplace
+                    <img src={logo} width="60" height="50" className="" alt="" />
                 </Navbar.Brand>
                 <Navbar.Toggle aria-controls="responsive-navbar-nav" />
                 <Navbar.Collapse id="responsive-navbar-nav">
                     <Nav className="me-auto">
                         <Nav.Link as={Link} to="/">Home</Nav.Link>
                         <Nav.Link as={Link} to="/auction">Auction</Nav.Link>
+                        <Nav.Link as={Link} to="/trade">Trade</Nav.Link>
                         <Nav.Link as={Link} to="/my-listed-items">My Listed NFTs</Nav.Link>
                         <Nav.Link as={Link} to="/my-purchases">My NFTs</Nav.Link>
                         <Nav.Link as={Link} to="/create">Create NFT</Nav.Link>

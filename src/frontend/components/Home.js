@@ -11,7 +11,7 @@ const Home = ({ marketplace, nft }) => {
     let items = []
     for (let i = 1; i <= itemCount; i++) {
       const item = await marketplace.items(i)
-      if (!item.sold) {
+      if (item.listedForSale) {
         // get uri url from nft contract
         const uri = await nft.tokenURI(item.tokenId)
         // use uri to fetch the nft metadata stored on ipfs 
@@ -54,7 +54,7 @@ const Home = ({ marketplace, nft }) => {
           <Row xs={1} md={2} lg={4} className="g-4 py-5">
             {items.map((item, idx) => (
               <Col key={idx} className="overflow-hidden">
-                <Card>
+                <Card className="m-4"> 
                   <Card.Img variant="top" src={item.image} />
                   <Card.Body color="secondary">
                     <Card.Title>{item.name}</Card.Title>
@@ -64,7 +64,7 @@ const Home = ({ marketplace, nft }) => {
                   </Card.Body>
                   <Card.Footer>
                     <div className='d-grid'>
-                      <Button onClick={() => buyMarketItem(item)} variant="primary" size="lg">
+                      <Button onClick={() => buyMarketItem(item)} variant="primary" size="md">
                         Buy for {ethers.utils.formatEther(item.totalPrice)} ETH
                       </Button>
                     </div>

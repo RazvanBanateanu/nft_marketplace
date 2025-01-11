@@ -69,7 +69,7 @@ export default function MyListedItems({ marketplace, nft, account }) {
       const priceInWei = ethers.utils.parseEther(priceInEth);
   
       // Call the relistItem function from the contract
-      const tx = await marketplace.relistItem(itemId, priceInWei, {
+      const tx = await marketplace.listItem(itemId, priceInWei, {
         from: account,
       });
   
@@ -133,6 +133,23 @@ export default function MyListedItems({ marketplace, nft, account }) {
     }
   };
 
+  const handleListForTrade = async (itemId) => {
+    try {
+      const tx = await marketplace.createTrade(itemId, {
+        from: account,
+      });
+  
+      // Wait for the transaction to be mined
+      await tx.wait();
+  
+      alert(`Item id: ${itemId} listed for trade.`);
+      loadListedItems(); // Refresh the listed items
+    } catch (error) {
+      console.error("Error listing for trade:", error);
+      alert("Error listing for trade.");
+    }
+  };
+
 
 
   useEffect(() => {
@@ -152,7 +169,7 @@ export default function MyListedItems({ marketplace, nft, account }) {
           <Row xs={1} md={2} lg={4} className="g-4 py-3">
             {listedItems.map((item, idx) => (
               <Col key={idx} className="overflow-hidden">
-                <Card>
+                <Card className='m-4'>
                   <Card.Img variant="top" src={item.image} />
                   <Card.Body>
                     <Card.Title>{item.name}</Card.Title>
@@ -175,7 +192,7 @@ export default function MyListedItems({ marketplace, nft, account }) {
                           List Item
                         </Button>
                       </div>
-                      <div className="mt-3">
+                      <div className="mt-1">
                         <h5>Start Auction</h5>
                         <Form.Control
                           type="text"
@@ -198,7 +215,7 @@ export default function MyListedItems({ marketplace, nft, account }) {
                           Start Auction
                         </Button>
                       </div>
-                      <div className="mt-3">
+                      <div className="mt-1">
                         <h5>End Auction</h5>
                         <Button
                           variant="danger"
@@ -211,6 +228,15 @@ export default function MyListedItems({ marketplace, nft, account }) {
                         {item.endTime > Math.floor(Date.now() / 1000) && (
                           <small className="text-muted">Auction is still active</small>
                         )}
+                      </div>
+                      <div className="mt-1">
+                        <Button
+                          variant="danger"
+                          className="mt-2"
+                          onClick={() => handleListForTrade(item.itemId)}
+                        >
+                          List For Trade
+                        </Button>
                       </div>
                     </Card.Footer>
                 </Card>

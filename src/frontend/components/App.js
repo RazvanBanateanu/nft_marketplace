@@ -7,6 +7,7 @@ import Navigation from './Navbar';
 import Home from './Home.js'
 import Create from './Create.js'
 import Auction from './Auction.js'
+import Trade from './Trade.js'
 import MyListedItems from './MyListedItems.js'
 import MyPurchases from './MyPurchases.js'
 import MarketplaceAbi from '../contractsData/Marketplace.json'
@@ -54,7 +55,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="App">
+      <div className="App background">
         <>
           <Navigation web3Handler={web3Handler} account={account} />
         </>
@@ -71,6 +72,9 @@ function App() {
               } />
               <Route path="/auction" element={
                 <Auction marketplace={marketplace} nft={nft} />
+              } />
+              <Route path="/trade" element={
+                <Trade marketplace={marketplace} nft={nft} account={account} />
               } />
               <Route path="/create" element={
                 <Create marketplace={marketplace} nft={nft} />

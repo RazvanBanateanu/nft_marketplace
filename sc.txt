@@ -1,0 +1,244 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.4;
+
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "hardhat/console.sol";
+
+contract Marketplace is ReentrancyGuard {
+
+    // Variables
+    address payable public immutable feeAccount; // the account that receives fees
+    uint public immutable feePercent; // the fee percentage on sales 
+    uint public itemCount; 
+
+    struct Item {
+        uint itemId;
+        IERC721 nft;
+        uint tokenId;
+        uint price;
+        address payable seller;
+        address owner;
+        bool sold;
+    }
+
+    struct Auction {
+        uint itemId;
+        uint startingPrice;
+        uint highestBid;
+        address payable highestBidder;
+        uint endTime;
+        bool ended;
+        address payable seller;
+    }
+
+    struct Trade {
+        uint tradeId;
+        uint itemId1;
+        uint itemId2;
+        address participant1;
+        address participant2;
+        bool approval1;
+        bool approval2;
+    }
+
+    // itemId -> Item
+    mapping(uint => Item) public items;
+
+    // itemId -> Auction
+    mapping(uint => Auction) public auctions;
+
+    // tradeId -> Trade
+    mapping(uint => Trade) public trades;
+
+    uint public tradeCount; // Counter for trade IDs
+
+    event Offered(
+        uint itemId,
+        address indexed nft,
+        uint tokenId,
+        uint price,
+        address indexed seller,
+        address indexed owner
+    );
+
+    event Bought(
+        uint itemId,
+        address indexed nft,
+        uint tokenId,
+        uint price,
+        address indexed seller,
+        address indexed buyer
+    );
+
+    event AuctionCreated(
+        uint itemId,
+        uint startingPrice,
+        uint endTime,
+        address indexed seller
+    );
+
+    event BidPlaced(
+        uint itemId,
+        uint bidAmount,
+        address indexed bidder
+    );
+
+    event AuctionEnded(
+        uint itemId,
+        uint highestBid,
+        address indexed highestBidder
+    );
+
+    event TradeProposed(
+        uint tradeId,
+        uint itemId1,
+        uint itemId2,
+        address participant1,
+        address participant2
+    );
+
+    event TradeApproved(
+        uint tradeId,
+        address participant
+    );
+
+    event TradeCompleted(
+        uint tradeId,
+        uint itemId1,
+        uint itemId2,
+        address participant1,
+        address participant2
+    );
+
+    constructor(uint _feePercent) {
+        feeAccount = payable(msg.sender);
+        feePercent = _feePercent;
+    }
+
+    // Make item to offer on the marketplace
+    function makeItem(IERC721 _nft, uint _tokenId, uint _price) external nonReentrant {
+        require(_price > 0, "Price must be greater than zero");
+        // increment itemCount
+        itemCount ++;
+        // transfer nft
+        _nft.transferFrom(msg.sender, address(this), _tokenId);
+        // add new item to items mapping
+        items[itemCount] = Item (
+            itemCount,
+            _nft,
+            _tokenId,
+            _price,
+            payable(msg.sender),
+            msg.sender, // the initial owner is the seller
+            false
+        );
+        // emit Offered event
+        emit Offered(
+            itemCount,
+            address(_nft),
+            _tokenId,
+            _price,
+            msg.sender,
+            msg.sender // seller is also the owner initially
+        );
+    }
+
+    function purchaseItem(uint _itemId) external payable nonReentrant {
+        uint _totalPrice = getTotalPrice(_itemId);
+        Item storage item = items[_itemId];
+        require(_itemId > 0 && _itemId <= itemCount, "item doesn't exist");
+        require(msg.value >= _totalPrice, "not enough ether to cover item price and market fee");
+        require(!item.sold, "item already sold");
+
+        // Pay seller and feeAccount
+        item.seller.transfer(item.price);
+        feeAccount.transfer(_totalPrice - item.price);
+
+        // Update item to sold
+        item.sold = true;
+
+        // Update the owner to the buyer
+        item.owner = msg.sender;
+
+        // Transfer NFT to buyer
+        item.nft.transferFrom(address(this), msg.sender, item.tokenId);
+        
+        // Emit Bought event
+        emit Bought(
+            _itemId,
+            address(item.nft),
+            item.tokenId,
+            item.price,
+            item.seller,
+            msg.sender
+        );
+    }
+
+    function getTotalPrice(uint _itemId) view public returns(uint){
+        return((items[_itemId].price*(100 + feePercent))/100);
+    }
+
+    function proposeTrade(uint _itemId1, uint _itemId2) external nonReentrant {
+        Item storage item1 = items[_itemId1];
+        Item storage item2 = items[_itemId2];
+
+        require(item1.owner == msg.sender || item2.owner == msg.sender, "You must own one of the items to propose a trade");
+        require(!item1.sold && !item2.sold, "Both items must be available for trade");
+
+        tradeCount++;
+        trades[tradeCount] = Trade(
+            tradeCount,
+            _itemId1,
+            _itemId2,
+            item1.owner,
+            item2.owner,
+            false,
+            false
+        );
+
+        emit TradeProposed(tradeCount, _itemId1, _itemId2, item1.owner, item2.owner);
+    }
+
+    function approveTrade(uint _tradeId) external nonReentrant {
+        Trade storage trade = trades[_tradeId];
+
+        require(trade.tradeId > 0, "Trade does not exist");
+        require(!trade.approval1 || !trade.approval2, "Trade already approved by both parties");
+        require(msg.sender == trade.participant1 || msg.sender == trade.participant2, "You are not part of this trade");
+
+        if (msg.sender == trade.participant1) {
+            trade.approval1 = true;
+        } else if (msg.sender == trade.participant2) {
+            trade.approval2 = true;
+        }
+
+        emit TradeApproved(_tradeId, msg.sender);
+
+        if (trade.approval1 && trade.approval2) {
+            completeTrade(_tradeId);
+        }
+    }
+
+    function completeTrade(uint _tradeId) internal {
+        Trade storage trade = trades[_tradeId];
+
+        Item storage item1 = items[trade.itemId1];
+        Item storage item2 = items[trade.itemId2];
+
+        // Swap ownership
+        address tempOwner = item1.owner;
+        item1.owner = item2.owner;
+        item2.owner = tempOwner;
+
+        // Transfer NFTs
+        item1.nft.transferFrom(address(this), item1.owner, item1.tokenId);
+        item2.nft.transferFrom(address(this), item2.owner, item2.tokenId);
+
+        // Mark both items as sold to complete the trade
+        item1.sold = true;
+        item2.sold = true;
+
+        emit TradeCompleted(_tradeId, trade.itemId1, trade.itemId2, trade.participant1, trade.participant2);
+    }
+}
