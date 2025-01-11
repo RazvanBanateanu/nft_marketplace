@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { ethers } from "ethers"
 import { Row, Col, Card, Button, Form } from 'react-bootstrap'
 
-export default function MyListedItems({ marketplace, nft, account }) {
+export default function MyNFTs({ marketplace, nft, account }) {
   const [loading, setLoading] = useState(true)
   const [listedItems, setListedItems] = useState([])
   const [prices, setPrices] = useState({}) 
@@ -169,7 +169,7 @@ export default function MyListedItems({ marketplace, nft, account }) {
           <Row xs={1} md={2} lg={4} className="g-4 py-3">
             {listedItems.map((item, idx) => (
               <Col key={idx} className="overflow-hidden">
-                <Card className='m-4'>
+                <Card className='m-4 custom_card'>
                   <Card.Img variant="top" src={item.image} />
                   <Card.Body>
                     <Card.Title>{item.name}</Card.Title>
@@ -177,7 +177,6 @@ export default function MyListedItems({ marketplace, nft, account }) {
                   </Card.Body>
                     <Card.Footer>
                       <div>
-                        <p>Price: {ethers.utils.formatEther(item.price)} ETH</p>
                         <Form.Control
                           type="text"
                           placeholder="Enter price in ETH"
@@ -193,7 +192,6 @@ export default function MyListedItems({ marketplace, nft, account }) {
                         </Button>
                       </div>
                       <div className="mt-1">
-                        <h5>Start Auction</h5>
                         <Form.Control
                           type="text"
                           placeholder="Starting Price (ETH)"
@@ -207,6 +205,8 @@ export default function MyListedItems({ marketplace, nft, account }) {
                           className="mt-2"
                           onChange={(e) => handleAuctionChange(item.itemId, 'duration', e.target.value)}
                         />
+                      </div>
+                      <div className="mt-1 d-flex justify-content-between">
                         <Button
                           variant="success"
                           className="mt-2"
@@ -214,9 +214,7 @@ export default function MyListedItems({ marketplace, nft, account }) {
                         >
                           Start Auction
                         </Button>
-                      </div>
-                      <div className="mt-1">
-                        <h5>End Auction</h5>
+
                         <Button
                           variant="danger"
                           className="mt-2"
@@ -231,7 +229,7 @@ export default function MyListedItems({ marketplace, nft, account }) {
                       </div>
                       <div className="mt-1">
                         <Button
-                          variant="danger"
+                          variant="success"
                           className="mt-2"
                           onClick={() => handleListForTrade(item.itemId)}
                         >

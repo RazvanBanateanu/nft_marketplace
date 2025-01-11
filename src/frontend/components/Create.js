@@ -10,24 +10,6 @@ const Create = ({ marketplace, nft }) => {
   const [name, setName] = useState("")
   const [desc, setDescription] = useState("")
   const [price, setPrice] = useState("")
-  // const uploadToIPFS = async (event) => {
-  //   event.preventDefault()
-  //   const file = event.target.files[0]
-  //   if (typeof file !== 'undefined') {
-  //     try {
-  //       const result = await client.add(file)
-  //       console.log(result)
-  //       setImage(`https://ipfs.infura.io/ipfs/${result.path}`)
-  //     } catch (error){
-  //       console.log("ipfs image upload error: ", error)
-  //     }
-  //   }
-  // }
-
-  ////////////////////////////////////////////////////////
-
-
-
   const sendJSONtoIPFS = async (ImgHash) => {
 
     try {
@@ -47,9 +29,6 @@ const Create = ({ marketplace, nft }) => {
         },
       });
 
-      // https://gateway.pinata.cloud/ipfs/QmZ6iZAhazHyakzynC4sxZ6r6cikJmS69mZaCoyburKuq
-
-
       const tokenURI = `https://gateway.pinata.cloud/ipfs/${resJSON.data.IpfsHash}`;
       console.log("Token URI", tokenURI);
       //mintNFT(tokenURI, currentAccount)   // pass the winner
@@ -61,9 +40,6 @@ const Create = ({ marketplace, nft }) => {
 
 
   }
-
-
-  ////////////////////////////////////////////////////////
 
   const sendFileToIPFS = async (e) => {
 
@@ -102,17 +78,6 @@ const Create = ({ marketplace, nft }) => {
     }
   }
 
-  ////////////////////////////////////////////////////////
-  // const createNFT = async () => {
-  //   if (!image || !price || !name || !description) return
-  //   try{
-  //     sendJSONtoIPFS(image)
-  //     // const result = await client.add(JSON.stringify({image, price, name, description}))
-  //     // mintThenList(result)
-  //   } catch(error) {
-  //     console.log("ipfs uri upload error: ", error)
-  //   }
-  // }
   const mintThenList = async (uri) => {
     // const uri = `https://ipfs.infura.io/ipfs/${result.path}`
     // mint nft 
@@ -129,7 +94,7 @@ const Create = ({ marketplace, nft }) => {
 
     <div className="container-fluid mt-5">
       <div className="row">
-        <main role="main" className="col-lg-12 mx-auto" style={{ maxWidth: '1000px' }}>
+        <main role="main" className="col-lg-6 mx-auto" style={{ maxWidth: '1000px' }}>
           <div className="content mx-auto">
             <Row className="g-4">
               <Form.Control onChange={(e) => setFile(e.target.files[0])} size="lg" required type="file" name="file" />
@@ -138,7 +103,7 @@ const Create = ({ marketplace, nft }) => {
               <Form.Control onChange={(e) => setPrice(e.target.value)} size="lg" required type="number" placeholder="Price in ETH" />
               <div className="d-grid px-0">
                 <Button onClick={sendFileToIPFS} variant="primary" size="lg">
-                  Create & List NFT!
+                  Create NFT!
                 </Button>
               </div>
             </Row>

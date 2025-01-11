@@ -9,7 +9,7 @@ import Create from './Create.js'
 import Auction from './Auction.js'
 import Trade from './Trade.js'
 import MyListedItems from './MyListedItems.js'
-import MyPurchases from './MyPurchases.js'
+import MyNFTs from './MyNFTs.js'
 import MarketplaceAbi from '../contractsData/Marketplace.json'
 import MarketplaceAddress from '../contractsData/Marketplace-address.json'
 import NFTAbi from '../contractsData/NFT.json'
@@ -82,8 +82,8 @@ function App() {
               <Route path="/my-listed-items" element={
                 <MyListedItems marketplace={marketplace} nft={nft} account={account} />
               } />
-              <Route path="/my-purchases" element={
-                <MyPurchases marketplace={marketplace} nft={nft} account={account} />
+              <Route path="/my-nfts" element={
+                <MyNFTs marketplace={marketplace} nft={nft} account={account} />
               } />
             </Routes>
           )}

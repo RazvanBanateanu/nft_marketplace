@@ -18,7 +18,7 @@ const Navigation = ({ web3Handler, account }) => {
                         <Nav.Link as={Link} to="/auction">Auction</Nav.Link>
                         <Nav.Link as={Link} to="/trade">Trade</Nav.Link>
                         <Nav.Link as={Link} to="/my-listed-items">My Listed NFTs</Nav.Link>
-                        <Nav.Link as={Link} to="/my-purchases">My NFTs</Nav.Link>
+                        <Nav.Link as={Link} to="/my-nfts">My NFTs</Nav.Link>
                         <Nav.Link as={Link} to="/create">Create NFT</Nav.Link>
                     </Nav>
                     <Nav>

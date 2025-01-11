@@ -321,7 +321,7 @@ contract Marketplace is ReentrancyGuard {
         Auction storage auction = auctions[_itemId];
         require(block.timestamp < auction.endTime, "auction ended");
         require(msg.value > auction.startingPrice, "bid must be higher than current highest bid");
-
+        
         // Refund previous highest bidder securely using call
         if (auction.highestBid > 0) {
             (bool success, ) = auction.highestBidder.call{value: auction.highestBid}("");
