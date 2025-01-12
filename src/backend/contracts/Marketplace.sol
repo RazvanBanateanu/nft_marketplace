@@ -301,6 +301,8 @@ contract Marketplace is ReentrancyGuard {
 
         item.nft.transferFrom(msg.sender, address(this), item.tokenId);
         
+        item.listedForAuction = true;
+        
         uint endTime = block.timestamp + _duration;
         auctions[_itemId] = Auction(
             _itemId,
@@ -373,6 +375,9 @@ contract Marketplace is ReentrancyGuard {
         else {
             // No bids, NFT remains with the seller
             item.nft.transferFrom(address(this), auction.seller, item.tokenId);
+            item.listedForSale = false;
+            item.listedForAuction = false;
+            item.listedForTrade = false;
         }
     }
 

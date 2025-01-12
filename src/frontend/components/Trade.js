@@ -160,7 +160,7 @@ const Trade = ({ marketplace, nft, account }) => {
         <Row xs={1} md={2} lg={4} className="g-4 py-5">
           {items.map((item, idx) => (
             <Col key={idx} className="overflow-hidden">
-              <Card className='m-4'>
+              <Card className='m-4 custom_card'>
                 <Card.Img variant="top" src={item.image} />
                 <Card.Body>
                   <Card.Title>{item.name}</Card.Title>
