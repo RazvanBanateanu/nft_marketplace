@@ -18,19 +18,22 @@ This project aims to make NFTs accessible to everyone by combining blockchain se
 1. Clone the Repository
 2. Install Dependencies:
 
+    ```bash
     cd nft_marketplace
     npm install
 
 3. Boot up local development blockchain
-
+    ```bash
     npx hardhat node
 
 4. Connect development blockchain accounts to Metamask
 
 5. Deploy Smart Contracts
 
-npx hardhat run src/backend/scripts/deploy.js --network localhost
+    ```bash
+    npx hardhat run src/backend/scripts/deploy.js --network localhost
 
 6. Launch Frontend
 
+    ```bash
     npm run start
