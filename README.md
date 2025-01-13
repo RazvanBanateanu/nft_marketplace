@@ -17,18 +17,18 @@ This project aims to make NFTs accessible to everyone by combining blockchain se
 ## Setting Up
 0. Clone the Repository
 
-1. Add .env file with your Pinata KEYS:
+1. Install Dependencies:
+
+    ```bash
+    cd nft_marketplace
+    npm install
+
+2. Add .env file with your Pinata KEYS (https://pinata.cloud/):
 
     ```bash
     REACT_APP_PINATA_API_KEY=''
     REACT_APP_PINATA_SECRET_API_KEY=''
     REACT_APP_PINATA_SECRET_ACCESS_TOKEN=''
-    
-2. Install Dependencies:
-
-    ```bash
-    cd nft_marketplace
-    npm install
 
 3. Boot up local development blockchain
     ```bash
