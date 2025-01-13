@@ -15,7 +15,15 @@ This project aims to make NFTs accessible to everyone by combining blockchain se
 ---
 
 ## Setting Up
-1. Clone the Repository
+0. Clone the Repository
+
+1. Add .env file with your Pinata KEYS:
+
+    ```bash
+    REACT_APP_PINATA_API_KEY=''
+    REACT_APP_PINATA_SECRET_API_KEY=''
+    REACT_APP_PINATA_SECRET_ACCESS_TOKEN=''
+    
 2. Install Dependencies:
 
     ```bash
